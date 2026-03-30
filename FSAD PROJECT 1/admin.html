@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Eventify</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box">
+            <div class="login-logo">Eventify Admin Access</div>
+            <p class="login-subtitle">Please enter your credentials to access the secure dashboard.</p>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="adminUsername" required placeholder="Enter username">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="adminPassword" required placeholder="Enter password">
+                </div>
+                <button type="submit" class="primary-btn w-full mt-4">Safe Login</button>
+            </form>
+            <p class="mt-4" style="text-align:center;font-size:0.85rem;color:var(--text-muted)">Demo Credentials: admin
+                / password123</p>
+            <a href="index.html"
+                style="display:block;text-align:center;margin-top:1rem;color:var(--accent);text-decoration:none;font-size:0.9rem;font-weight:600;">←
+                Back to Website</a>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">Eventify Admin</div>
+            <ul class="nav">
+                <li class="nav-item active" onclick="switchTab('dashboard')">Dashboard Overview</li>
+                <li class="nav-item" onclick="switchTab('events')">Manage Events</li>
+                <li class="nav-item" onclick="switchTab('bookings')">All Bookings</li>
+                <li class="nav-item" onclick="switchTab('promos')">Promo Codes</li>
+                <li class="nav-item" onclick="switchTab('users_list')">Users Manager</li>
+            </ul>
+            <div class="bottom-nav">
+                <button class="danger-btn w-full" onclick="logoutAdmin()"
+                    style="margin-bottom: 1rem; text-align: center; display: block;">Logout Securely</button>
+                <a href="index.html" class="back-link" style="display:block;text-align:center;">← Visit User Site</a>
+                <div class="data-status" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.7rem;">
+                    <span style="color: var(--text-sidebar); display: block; margin-bottom: 0.4rem; opacity: 0.6;">Local Storage Node:</span>
+                    <code id="dataIndicator" style="display: block; background: rgba(0,0,0,0.3); padding: 0.4rem; border-radius: 4px; color: var(--accent); margin-bottom: 1rem; word-break: break-all; opacity: 0.8;">Local File</code>
+                    <button class="danger-btn w-full" onclick="resetToDefaults()" style="font-size: 0.65rem; padding: 0.3rem; border-color: rgba(239, 68, 68, 0.2); background: transparent; color: #fca5a5;">Restore Demo Data</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <h2 id="pageTitle">Overview</h2>
+                <div class="user-profile">Admin Mode</div>
+            </header>
+
+            <!-- Dashboard Tab -->
+            <section id="dashboard" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">Total Active Events</div>
+                        <div class="stat-value" id="totalEventsVal">0</div>
+                    </div>
+                    <div class="stat-card highlight">
+                        <div class="stat-title">Total Revenue</div>
+                        <div class="stat-value" id="totalRevenueVal">₹0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Total Tickets Sold</div>
+                        <div class="stat-value" id="totalTicketsVal">0</div>
+                    </div>
+                </div>
+
+                <div class="analytics-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
+                    <div class="stat-card" style="height: 350px;">
+                        <h3>Revenue by Category</h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div class="stat-card" style="height: 350px;">
+                        <h3>Tickets Sold per Event</h3>
+                        <canvas id="ticketsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="recent-section">
+                    <h3>Recent Bookings</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User Name</th>
+                                    <th>Event Name</th>
+                                    <th>Tickets</th>
+                                    <th>Amount Paid</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentBookingsTable">
+                                <!-- Data populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Manage Events Tab -->
+            <section id="events" class="tab-content">
+                <div class="action-header">
+                    <h3>Event Management</h3>
+                    <button class="primary-btn pulse" onclick="openEventModal()">+ Create New Event</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Event Name</th>
+                                <th>Date & Time</th>
+                                <th>Location</th>
+                                <th>Price</th>
+                                <th>Avail. Qty</th>
+                                <th>Waitlist</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventsTableBody">
+                            <!-- Data populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- All Bookings Tab -->
+            <section id="bookings" class="tab-content">
+                <div class="action-header"
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h3 style="margin-bottom: 0;">Lifetime Ticket Bookings</h3>
+                    <button class="primary-btn" onclick="exportBookingsToCSV()"
+                        style="background: #312e81; border-color: #312e81; color: white; font-weight: 700;">📄 Export to CSV</button>
+                </div>
+                <div class="table-container mt-4">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Customer Name</th>
+                                <th>Event Booked</th>
+                                <th>Tickets</th>
+                                <th>Total Cost</th>
+                                <th>Booking Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allBookingsTableBody">
+                            <!-- Data populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Promo Codes Tab -->
+            <section id="promos" class="tab-content">
+                <div class="action-header">
+                    <h3>Promotional Discount Codes</h3>
+                    <button class="primary-btn pulse" onclick="openPromoModal()">+ Create New Code</button>
+                </div>
+                <div class="table-container mt-4">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Discount (%)</th>
+                                <th>Expiry Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="promosTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Users Manager Tab -->
+            <section id="users_list" class="tab-content">
+                <h3>Registered Users</h3>
+                <div class="table-container mt-4">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Total Bookings</th>
+                                <th>Total Spent</th>
+                                <th>Last Booking</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Create Event Modal -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeEventModal()">&times;</span>
+            <h2>Create New Event</h2>
+            <form id="createEventForm">
+                <div class="input-group">
+                    <label>Event Name</label>
+                    <input type="text" id="eventName" required placeholder="E.g., Neon Symphony Night">
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Category</label>
+                        <input type="text" id="eventCategory" list="categoryOptions" required
+                            placeholder="e.g. Music, Tech, Sports...">
+                        <datalist id="categoryOptions">
+                            <option value="Music">
+                            <option value="Tech">
+                            <option value="Art">
+                            <option value="Food">
+                            <option value="Games">
+                            <option value="Sports">
+                            <option value="Workshop">
+                        </datalist>
+                    </div>
+                    <div class="input-group">
+                        <label>Banner Image (URL)</label>
+                        <input type="text" id="eventImageUrl" placeholder="Optional: paste image link">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Date</label>
+                        <input type="date" id="eventDate" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Time</label>
+                        <input type="time" id="eventTime" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Location</label>
+                    <input type="text" id="eventLocation" required placeholder="E.g., Grand Arena, NY">
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Ticket Price (₹)</label>
+                        <input type="number" id="eventPrice" min="0" required placeholder="1500">
+                    </div>
+                    <div class="input-group">
+                        <label>Total Ticket Quantity</label>
+                        <input type="number" id="eventQty" min="1" required placeholder="200">
+                    </div>
+                </div>
+                <button type="submit" class="primary-btn mt-4 w-full">Save Event to Database</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Event Modal -->
+    <div id="editEventModal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 600px;">
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="editModalTitle">Edit Event Details</h2>
+            </div>
+            <form id="editEventForm" class="event-form">
+                <input type="hidden" id="editEventId">
+                <div class="input-group">
+                    <label>Event Name</label>
+                    <input type="text" id="editEventName" required placeholder="Name of your event">
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Category</label>
+                        <input type="text" id="editEventCategory" list="categoryOptions" required
+                            placeholder="e.g. Music, Tech...">
+                    </div>
+                    <div class="input-group">
+                        <label>Banner Image (URL)</label>
+                        <input type="text" id="editEventImageUrl" placeholder="Optional: paste image link">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Date</label>
+                        <input type="date" id="editEventDate" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Time</label>
+                        <input type="time" id="editEventTime" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Location</label>
+                    <input type="text" id="editEventLocation" required placeholder="Venue, City">
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Price (₹)</label>
+                        <input type="number" id="editEventPrice" min="0" required placeholder="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Initial Quantity</label>
+                        <input type="number" id="editEventQty" min="1" required placeholder="100">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="primary-btn">Save Changes</button>
+                    <button type="button" class="back-link" onclick="closeEditModal()"
+                        style="background:none; border:none; cursor:pointer;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Waitlist Detail Modal (Admin) -->
+    <div id="waitlistDetailModal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 500px;">
+            <span class="close-modal" onclick="closeWaitlistDetailModal()">&times;</span>
+            <h2 id="waitlistDetailTitle">Waitlisted Customers</h2>
+            <div id="waitlistDetailList" style="margin-top: 1rem; max-height: 300px; overflow-y: auto;">
+                <!-- List of users -->
+            </div>
+            <button class="primary-btn mt-4 w-full" onclick="closeWaitlistDetailModal()">Close View</button>
+        </div>
+    </div>
+
+    <!-- Promo Modal -->
+    <div id="promoModal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 400px;">
+            <span class="close-modal" onclick="closePromoModal()">&times;</span>
+            <h2>Create Promo Code</h2>
+            <form id="createPromoForm">
+                <div class="input-group">
+                    <label>Promo Code (uppercase)</label>
+                    <input type="text" id="promoCode" required placeholder="E.g., SAVE20" style="text-transform: uppercase;">
+                </div>
+                <div class="input-group">
+                    <label>Discount Percentage (%)</label>
+                    <input type="number" id="promoDiscount" min="1" max="100" required placeholder="10">
+                </div>
+                <div class="input-group">
+                    <label>Expiry Date</label>
+                    <input type="date" id="promoExpiry" required>
+                </div>
+                <button type="submit" class="primary-btn w-full mt-4">Save Promo Code</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>

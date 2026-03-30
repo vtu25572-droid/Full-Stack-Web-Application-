@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventify - Discover Amazing Events</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="logo">Eventify.</div>
+        <div class="nav-links" id="navLinks">
+            <!-- Dynamic context populated via JS -->
+            <button class="primary-btn" style="padding: 0.5rem 1rem;" onclick="openAuthModal()">Login / Register</button>
+            <a href="admin.html" class="admin-link">Admin Dashboard</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1 class="main-title">Discover <span>Extraordinary</span> Events</h1>
+            <p class="subtitle">Book tickets for the most anticipated events, concerts, and workshops in your city.</p>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search events by name or location...">
+            </div>
+            <div class="categories-container">
+                <button class="cat-filter active" onclick="filterByCategory('All', this)">All</button>
+                <button class="cat-filter" onclick="filterByCategory('Music', this)">Music</button>
+                <button class="cat-filter" onclick="filterByCategory('Tech', this)">Tech</button>
+                <button class="cat-filter" onclick="filterByCategory('Art', this)">Art</button>
+                <button class="cat-filter" onclick="filterByCategory('Food', this)">Food</button>
+                <button class="cat-filter" onclick="filterByCategory('Games', this)">Games</button>
+            </div>
+        </header>
+
+        <section class="events-section">
+            <h2 class="section-title">Upcoming Events</h2>
+            <div id="eventList" class="event-grid">
+                <!-- Events will be rendered here via JS -->
+            </div>
+        </section>
+
+        <section class="events-section" id="myBookingsSection" style="display: none; margin-top: 5rem;">
+            <h2 class="section-title">My Tickets</h2>
+            <div id="myTicketList" class="event-grid">
+                <!-- Tickets rendered here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content glass-panel">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 id="modalEventName">Event Name</h2>
+            <p id="modalEventDetails" class="modal-details">Date | Location | Price</p>
+            
+            <form id="bookingForm">
+                <input type="hidden" id="modalEventId">
+                <div class="input-group">
+                    <label for="userName">Booking Profile</label>
+                    <input type="text" id="userName" required readonly style="background: rgba(0,0,0,0.2); cursor: not-allowed; color: var(--text-muted); border-color: transparent;">
+                </div>
+                <div class="input-group">
+                    <label for="ticketCount">Number of Tickets</label>
+                    <input type="number" id="ticketCount" min="1" value="1" required>
+                </div>
+                <div class="input-group">
+                    <label for="promoInput">Promo Code</label>
+                    <div style="display:flex; gap: 0.5rem;">
+                        <input type="text" id="promoInput" placeholder="E.g. SAVE10" style="text-transform: uppercase;">
+                        <button type="button" class="primary-btn" onclick="applyPromo()" style="padding: 0.5rem 1rem; font-size: 0.8rem; background: var(--accent-1); border-color: var(--accent-1);">Apply</button>
+                    </div>
+                    <small id="promoStatus" style="display:block; margin-top: 0.3rem; font-size: 0.8rem;"></small>
+                </div>
+                <div class="price-calc">
+                    Total: <span id="totalPrice">₹0</span>
+                    <div id="discountInfo" style="font-size: 0.85rem; color: var(--accent-1); margin-top: 0.2rem; display: none;"></div>
+                </div>
+                <button type="submit" class="primary-btn pulse-btn">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 400px; padding: 2rem;">
+            <span class="close-modal" onclick="closeAuthModal()">&times;</span>
+            <div class="auth-tabs" style="display:flex;margin-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,0.1);">
+                <button id="tabLogin" class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+                <button id="tabRegister" class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUser" required placeholder="janedoe">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPass" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="primary-btn w-full mt-4">Login Securely</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form" style="display:none;">
+                <div class="input-group">
+                    <label>Choose Username</label>
+                    <input type="text" id="regUser" required placeholder="janedoe">
+                </div>
+                <div class="input-group">
+                    <label>Create Password</label>
+                    <input type="password" id="regPass" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="primary-btn w-full mt-4">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Waitlist Modal -->
+    <div id="waitlistModal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 400px; padding: 2rem;">
+            <span class="close-modal" onclick="closeWaitlistModal()">&times;</span>
+            <h2 id="waitlistEventName" style="color:var(--accent-2);">Join Waitlist</h2>
+            <p style="margin: 1rem 0; color: var(--text-muted);">This event is currently sold out. Join the waitlist to be notified if more tickets become available!</p>
+            
+            <form id="waitlistForm">
+                <input type="hidden" id="waitlistEventId">
+                <div class="input-group">
+                    <label>Your Name</label>
+                    <input type="text" id="waitlistUserName" readonly style="background: rgba(0,0,0,0.2); cursor: not-allowed; color: var(--text-muted); border-color: transparent;">
+                </div>
+                <button type="submit" class="primary-btn pulse-btn" style="background: var(--accent-2); border-color: var(--accent-2); width: 100%;">Join Waitlist Now</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
